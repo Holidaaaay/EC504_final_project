@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Interactive Image Segmentation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        img {
+            max-width: 100%;
+            max-height: 60vh;
+            cursor: crosshair;
+            margin-bottom: 20px;
+        }
+        .message {
+            color: #333;
+            margin-top: 10px;
+        }
+        .custom-file-input-wrapper {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .custom-file-input {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        .custom-file-input:hover {
+            background-color: #0056b3;
+        }
+        .custom-file-input input[type="file"] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Interactive Image Segmentation</h1>
+    <form action="/" method="post" enctype="multipart/form-data">
+        <div class="custom-file-input-wrapper">
+            <label class="custom-file-input">
+                Select Image
+                <input type="file" name="file" accept="image/*">
+            </label>
+            <button type="submit">Upload</button>
+        </div>
+    </form>
+    {% if filename %}
+    <div>
+        <img id="uploaded-image" src="/uploads/{{ filename }}" onclick="selectPoint(event)">
+    </div>
+    <form action="/click/{{ filename }}" method="post" id="click-form">
+        <input type="hidden" name="x" id="click-x">
+        <input type="hidden" name="y" id="click-y">
+    </form>
+    <form action="/segment/{{ filename }}" method="post">
+        <button type="submit">Remove</button>
+    </form>
+    {% if result_filename %}
+    <script>
+        document.getElementById('uploaded-image').src = "/results/{{ result_filename }}";
+    </script>
+    {% endif %}
+    {% endif %}
+    <div class="message">{{ message }}</div>
+    <script>
+        function selectPoint(event) {
+            const img = event.target;
+            const rect = img.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            const scaleX = img.naturalWidth / rect.width;
+            const scaleY = img.naturalHeight / rect.height;
+            const clickX = Math.round(x * scaleX);
+            const clickY = Math.round(y * scaleY);
+
+            document.getElementById('click-x').value = clickX;
+            document.getElementById('click-y').value = clickY;
+
+            // 提交点击的坐标
+            document.getElementById('click-form').submit();
+        }
+    </script>
+</body>
+</html>
