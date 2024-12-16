@@ -69,7 +69,6 @@ def segment_image(file_path, bg_seed):
     h, w, c = img.shape
     pixels = img.reshape((-1, 3))
 
-    # 使用 KMeans 聚类
     kmeans = KMeans(n_clusters=2, random_state=0)
     labels = kmeans.fit_predict(pixels)
     centers = kmeans.cluster_centers_
@@ -126,7 +125,6 @@ def segment_image(file_path, bg_seed):
         g = maxflow.Graph[float]()
         node_ids = g.add_grid_nodes((h, w))
 
-        # 添加种子点
         bg_x, bg_y = bg_seed
 
         for y in range(h):
@@ -134,7 +132,7 @@ def segment_image(file_path, bg_seed):
                 fg_capacity = likelihood[y, x]
                 bg_capacity = 1 - likelihood[y, x]
 
-                if (y, x) == (bg_y, bg_x):  # 背景种子点
+                if (y, x) == (bg_y, bg_x):
                     g.add_tedge(node_ids[y, x], 0, float('inf'))
                 else:
                     g.add_tedge(node_ids[y, x], fg_capacity, bg_capacity)
